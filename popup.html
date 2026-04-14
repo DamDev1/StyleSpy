@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StyleSpy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0b0b0f;
+      --surface: #131318;
+      --surface2: #1c1c24;
+      --border: #2a2a38;
+      --accent: #c8f04a;
+      --accent2: #7b5ef8;
+      --text: #f0f0f5;
+      --text-dim: #7a7a90;
+      --font-display: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --radius: 10px;
+    }
+
+    body {
+      width: 420px;
+      min-height: 520px;
+      max-height: 640px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #131318 60%, #1a1428 100%);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .logo-icon {
+      width: 30px;
+      height: 30px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text span {
+      color: var(--accent);
+    }
+
+    .scan-btn {
+      background: var(--accent);
+      color: #0b0b0f;
+      border: none;
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: 12px;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: all 0.15s;
+    }
+
+    .scan-btn:hover {
+      background: #d8ff5c;
+      transform: translateY(-1px);
+    }
+
+    .scan-btn:active {
+      transform: translateY(0);
+    }
+
+    .scan-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .bmc-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #FFDD00;
+      color: #000;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: 11px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .bmc-btn:hover {
+      background: #ffe833;
+      transform: translateY(-1px);
+    }
+
+    .bmc-btn:active {
+      transform: translateY(0);
+    }
+
+    .page-info {
+      padding: 10px 18px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: none;
+      flex-shrink: 0;
+    }
+
+    .page-info.visible {
+      display: block;
+    }
+
+    .page-info .site-name {
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .page-info .site-url {
+      color: var(--text-dim);
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .tab:hover {
+      color: var(--text);
+    }
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab .count {
+      display: inline-block;
+      background: var(--surface2);
+      color: var(--text-dim);
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 20px;
+      margin-left: 5px;
+    }
+
+    .tab.active .count {
+      background: rgba(200, 240, 74, 0.15);
+      color: var(--accent);
+    }
+
+    .panel {
+      display: none;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      gap: 12px;
+      color: var(--text-dim);
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      opacity: 0.4;
+    }
+
+    .empty-text {
+      font-family: var(--font-display);
+      font-size: 15px;
+      color: var(--text-dim);
+    }
+
+    .empty-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      opacity: 0.6;
+      text-align: center;
+      max-width: 200px;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    #colors-panel {
+      padding: 14px;
+    }
+
+    .section-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+      padding-left: 2px;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .color-swatch {
+      cursor: pointer;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: transform 0.12s, border-color 0.12s;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.07);
+      border-color: var(--accent);
+    }
+
+    .swatch-color {
+      width: 100%;
+      aspect-ratio: 1;
+    }
+
+    .swatch-hex {
+      background: var(--surface2);
+      padding: 4px 3px;
+      font-size: 9px;
+      text-align: center;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .copied-toast {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      background: var(--accent);
+      color: #0b0b0f;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 20px;
+      opacity: 0;
+      transition: all 0.2s;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .copied-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #fonts-panel {
+      padding: 14px;
+    }
+
+    .font-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+      transition: border-color 0.15s;
+    }
+
+    .font-card:hover {
+      border-color: var(--accent2);
+    }
+
+    .font-name {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .font-preview {
+      font-size: 22px;
+      color: var(--text-dim);
+      margin: 8px 0;
+      line-height: 1.2;
+      min-height: 30px;
+    }
+
+    .font-links {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .font-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 11px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.12s;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .font-link.google {
+      background: rgba(200, 240, 74, 0.12);
+      color: var(--accent);
+      border-color: rgba(200, 240, 74, 0.25);
+    }
+
+    .font-link.google:hover {
+      background: rgba(200, 240, 74, 0.22);
+    }
+
+    .font-link.adobe {
+      background: rgba(255, 80, 80, 0.1);
+      color: #ff8080;
+      border-color: rgba(255, 80, 80, 0.2);
+    }
+
+    .font-link.adobe:hover {
+      background: rgba(255, 80, 80, 0.2);
+    }
+
+    .font-link.fontsquirrel {
+      background: rgba(123, 94, 248, 0.12);
+      color: #a78bfa;
+      border-color: rgba(123, 94, 248, 0.25);
+    }
+
+    .font-link.fontsquirrel:hover {
+      background: rgba(123, 94, 248, 0.22);
+    }
+
+    .font-link.dafont {
+      background: rgba(100, 200, 255, 0.1);
+      color: #7dd3fc;
+      border-color: rgba(100, 200, 255, 0.2);
+    }
+
+    .font-link.dafont:hover {
+      background: rgba(100, 200, 255, 0.2);
+    }
+
+    .font-type-badge {
+      display: inline-block;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .badge-system {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-dim);
+    }
+
+    .badge-web {
+      background: rgba(200, 240, 74, 0.15);
+      color: var(--accent);
+    }
+
+    .export-bar {
+      display: none;
+      border-top: 1px solid var(--border);
+      padding: 10px 14px;
+      flex-shrink: 0;
+      background: var(--surface);
+      gap: 8px;
+    }
+
+    .export-bar.visible {
+      display: flex;
+    }
+
+    .export-btn {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .export-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <div>
+      <div class="logo">
+        <div class="logo-icon">🔍</div>
+        <div class="logo-text">Style<span>Spy</span></div>
+      </div>
+      <a class="bmc-btn" href="https://buymeacoffee.com/samueldami" style="margin-top: 10px;" target="_blank">
+        ☕ Buy me a coffee
+      </a>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="scan-btn" id="scanBtn">Scan Page</button>
+    </div>
+  </div>
+
+  <div class="page-info" id="pageInfo">
+    <div class="site-name" id="siteName"></div>
+    <div class="site-url" id="siteUrl"></div>
+  </div>
+
+  <div class="tabs" id="tabBar" style="display:none">
+    <div class="tab active" data-tab="colors">🎨 Colors <span class="count" id="colorCount">0</span></div>
+    <div class="tab" data-tab="fonts">✦ Fonts <span class="count" id="fontCount">0</span></div>
+  </div>
+
+  <div class="panel active" id="colors-panel">
+    <div class="empty" id="emptyColors">
+      <div class="empty-icon">🎨</div>
+      <div class="empty-text">No data yet</div>
+      <div class="empty-sub">Hit "Scan Page" to extract colors from this website</div>
+    </div>
+  </div>
+
+  <div class="panel" id="fonts-panel">
+    <div class="empty" id="emptyFonts">
+      <div class="empty-icon">✦</div>
+      <div class="empty-text">No data yet</div>
+      <div class="empty-sub">Hit "Scan Page" to detect fonts used on this website</div>
+    </div>
+  </div>
+
+  <div class="export-bar" id="exportBar">
+    <button class="export-btn" id="exportCss">Export CSS Vars</button>
+    <button class="export-btn" id="exportJson">Export JSON</button>
+  </div>
+
+  <div class="copied-toast" id="toast">Copied!</div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>

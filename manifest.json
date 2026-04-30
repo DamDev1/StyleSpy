@@ -3,7 +3,7 @@
   "name": "StyleSpy - Colors & Fonts Inspector",
   "version": "1.0.1",
   "description": "Extract every color and font a website uses, plus find where to download them.",
-  "permissions": ["activeTab", "scripting", "storage"],
+  "permissions": ["activeTab", "scripting"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
